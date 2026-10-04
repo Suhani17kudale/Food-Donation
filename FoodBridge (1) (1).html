@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<!--
+FoodBridge demo logins (password in brackets):
+ Donor donor@demo.com [demo123] | Volunteer vol@demo.com [demo123]
+ NGO ngo@demo.com [demo123] | Animal shelter paws@demo.com [demo123]
+ Admin admin@demo.com [admin123]
+Data lives in this browser's localStorage only (simulation, passwords are not secure).
+-->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FoodBridge - Smart Food Donation Network</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--bg:#FAFAF5;--tx:#1F2937;--mu:#64748b;--cd:#fff;--ln:#e5e7eb;--g:#2E9E5B;--o:#FF8A3D;--b:#3B82F6;--r:#dc2626;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1713;--tx:#e8efe9;--mu:#9aaba1;--cd:#17231c;--ln:#27382d}}
+:root[data-theme="dark"]{--bg:#0f1713;--tx:#e8efe9;--mu:#9aaba1;--cd:#17231c;--ln:#27382d}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 Inter,system-ui,sans-serif}
+h1,h2,h3{line-height:1.15;margin:0 0 .5em}h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:800}h2{font-size:1.6rem}h3{font-size:1.05rem}
+.w{max-width:1100px;margin:0 auto;padding:0 18px}a{color:inherit}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--ln);z-index:5}
+nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 18px;max-width:1100px;margin:0 auto}
+.logo{font-weight:800;font-size:1.3rem;color:var(--g);text-decoration:none;margin-right:auto}
+nav a.l,nav button.l{padding:7px 12px;border-radius:99px;text-decoration:none;color:var(--mu);font:500 .95rem inherit;font-family:inherit;background:none;border:0;cursor:pointer}
+nav a.on,nav a.l:hover{background:var(--g);color:#fff}#burger{display:none}
+@media(max-width:760px){#burger{display:block}nav .m{display:none;width:100%}nav.open .m{display:flex;flex-direction:column}}
+:focus-visible{outline:3px solid var(--o);outline-offset:2px}
+.btn{display:inline-block;background:var(--g);color:#fff;border:0;border-radius:12px;padding:11px 20px;font:600 1rem inherit;font-family:inherit;cursor:pointer;text-decoration:none}
+.btn.o{background:var(--o)}.btn.b{background:var(--b)}.btn.r{background:var(--r)}.btn.ghost{background:none;color:var(--tx);border:2px solid var(--ln)}.btn.s{padding:6px 12px;font-size:.88rem}
+.hero{padding:56px 0 30px;max-width:720px}.hero p{color:var(--mu);font-size:1.15rem}.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+.card p{margin:.3em 0;color:var(--mu);font-size:.93rem}.stat b{display:block;font-size:2rem;font-weight:800}
+.rg{border-top:5px solid var(--g)}.ro{border-top:5px solid var(--o)}.rb{border-top:5px solid var(--b)}
+.tag{display:inline-block;font-size:.78rem;font-weight:600;padding:2px 10px;border-radius:99px;background:#e3f4ea;color:#1c7a43;margin:0 4px 4px 0}
+.tag.u{background:#fde2e0;color:#b42318}.tag.a{background:#ffe9d6;color:#b45309}.tag.i{background:#dbeafe;color:#1d4ed8}.tag.m{background:#fef3c7;color:#92400e}
+section.p{padding:24px 0}form{display:grid;gap:12px;max-width:560px}label{display:grid;gap:4px;font-weight:600;font-size:.92rem}
+input,select,textarea{font:inherit;padding:10px 12px;border:1.5px solid var(--ln);border-radius:10px;background:var(--cd);color:var(--tx);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.err{color:var(--r);font-size:.85rem;font-weight:500}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rc{border:2px solid var(--ln);border-radius:12px;padding:10px;text-align:center;background:var(--cd);color:var(--tx);cursor:pointer;font:600 .9rem inherit;font-family:inherit}
+.rc[aria-pressed="true"]{border-color:var(--g);background:#e3f4ea;color:#14532d}
+.bar{height:12px;border-radius:9px;background:var(--ln);overflow:hidden;margin:6px 0}.bar i{display:block;height:100%}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--ln);white-space:nowrap}
+.scan{border:2px dashed var(--ln);border-radius:14px;padding:14px}.scan img{max-width:140px;border-radius:10px;display:block;margin:8px 0}
+.map{border:1px solid var(--ln);border-radius:16px;overflow:hidden;background:#dfeadb}.map svg{display:block;width:100%;height:auto}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:10px;z-index:9;max-width:90vw}
+.empty{padding:22px;border:2px dashed var(--ln);border-radius:14px;color:var(--mu)}
+footer{border-top:1px solid var(--ln);padding:20px 0;color:var(--mu);font-size:.88rem}
+@media(max-width:700px){.two,.roles{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header><nav id="nav" aria-label="Main"></nav></header>
+<main class="w" id="app" tabindex="-1"></main>
+<footer><div class="w">FoodBridge: connecting surplus food with people and animals in need. Demo data is stored only in your browser.</div></footer>
+<div id="toast" class="toast" role="status" hidden></div>
+<script>
+var K="fb2",SK="fb2s",mode="login",role="donor",scan=null,flt="All";
+function iso(h){return new Date(Date.now()+h*36e5).toISOString()}
+function seed(){return{users:[
+{id:1,role:"donor",name:"Spice Garden Restaurant",email:"donor@demo.com",phone:"9000000001",pw:"demo123",x:120,y:110,extra:"Restaurant"},
+{id:2,role:"volunteer",name:"Rohan (Volunteer)",email:"vol@demo.com",phone:"9000000002",pw:"demo123",x:300,y:270,extra:"Bike"},
+{id:3,role:"ngo",name:"Hope Shelter NGO",email:"ngo@demo.com",phone:"9000000003",pw:"demo123",x:500,y:150,extra:"120"},
+{id:4,role:"ngo",name:"Paws & Care Animal Shelter",email:"paws@demo.com",phone:"9000000004",pw:"demo123",x:440,y:320,extra:"40"},
+{id:9,role:"admin",name:"Admin",email:"admin@demo.com",phone:"-",pw:"admin123",x:0,y:0,extra:""}],
+dons:[
+{id:1,did:1,name:"Veg biryani",diet:"Veg",forw:"Humans",qty:40,exp:iso(5),addr:"Market Road",x:130,y:130,st:"Available",safe:92},
+{id:2,did:1,name:"Chapati and dal",diet:"Veg",forw:"Humans",qty:25,exp:iso(1.5),addr:"Market Road",x:150,y:95,st:"Available",safe:88},
+{id:3,did:1,name:"Rice and chicken scraps",diet:"Non-veg",forw:"Animals",qty:15,exp:iso(8),addr:"Market Road",x:110,y:150,st:"Accepted",nid:4,safe:null}],
+notes:[],nid:20}}
+function db(){try{var v=localStorage.getItem(K);if(v)return JSON.parse(v)}catch(e){}return seed()}
+var D=db();function sv(){try{localStorage.setItem(K,JSON.stringify(D))}catch(e){}}
+function me(){var id=null;try{id=+localStorage.getItem(SK)}catch(e){}return D.users.filter(function(u){return u.id===id})[0]}
+function e(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3200)}
+function note(uid,m){D.notes.unshift({uid:uid,m:m,t:new Date().toLocaleTimeString()})}
+function hrs(d){return(new Date(d.exp)-Date.now())/36e5}
+function left(d){var h=hrs(d);if(h<=0)return"Expired "+fmt(-h)+" ago";return"Expires in "+fmt(h)}
+function fmt(h){var m=Math.round(h*60);return m>=60?Math.floor(m/60)+"h "+m%60+"m":m+"m"}
+function user(id){return D.users.filter(function(u){return u.id===id})[0]||{name:"-"}}
+function live(d){return hrs(d)>0&&d.st!=="Delivered"}
+function tags(d){var h=hrs(d);return'<span class="tag '+(d.forw==="Animals"?"a":"")+'">'+(d.forw==="Animals"?"For animals":"For humans")+'</span><span class="tag i">'+e(d.diet)+'</span>'+(h<=0?'<span class="tag u">Expired</span>':h<2?'<span class="tag u">Urgent</span>':'')+(d.safe!=null?'<span class="tag m">Safe '+d.safe+'%</span>':'')+'<span class="tag m">'+d.st+'</span>'}
+function match(n,d){var dist=Math.hypot(n.x-d.x,n.y-d.y)/760,h=hrs(d),su=h<2?1:h<6?.6:.3,cap=+n.extra||1,sq=d.qty<=cap?1:cap/d.qty;return Math.round(100*(.5*(1-dist)+.3*su+.2*sq))}
+/* ---- food scan: colour analysis of the photo plus expiry time ---- */
+function analyze(file,cb){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=c.height=64;var g=c.getContext("2d");g.drawImage(im,0,0,64,64);var p=g.getImageData(0,0,64,64).data,m=0,dk=0;
+for(var i=0;i<p.length;i+=4){var r=p[i]/255,gg=p[i+1]/255,b=p[i+2]/255,mx=Math.max(r,gg,b),mn=Math.min(r,gg,b),d=mx-mn,s=mx?d/mx:0,h=0;
+if(d){h=mx===r?((gg-b)/d+6)%6:mx===gg?(b-r)/d+2:(r-gg)/d+4;h*=60}
+if(mx<.18)dk++;else if(h>70&&h<200&&s>.08&&s<.5&&mx>.25&&mx<.75)m++}
+cb({mold:m/40.96,dark:dk/40.96,src:im.src})};im.src=URL.createObjectURL(file)}
+function verdict(a,exp){var pen=Math.min(60,a.mold*2.5)+Math.min(30,a.dark*1.5),h=(new Date(exp)-Date.now())/36e5,s=Math.round(Math.max(0,100-pen));
+if(h<=0)s=Math.min(s,5);else if(h<2)s=Math.max(0,s-10);return{s:s,h:h}}
+function scanHTML(){if(!scan)return'';var v=scan.v,c=v.s>=80?"var(--g)":v.s>=50?"var(--o)":"var(--r)",l=v.s>=80?"Looks safe":v.s>=50?"Check before serving":"Not safe";
+return'<img src="'+scan.src+'" alt="Scanned food"><b>Safe to eat: '+v.s+'% ('+l+')</b><div class="bar"><i style="width:'+v.s+'%;background:'+c+'"></i></div><div>'+(v.h<=0?'<span class="tag u">EXPIRED '+fmt(-v.h)+' ago</span>':'<span class="tag">Fresh for about '+fmt(v.h)+'</span>')+'</div><p style="font-size:.82rem;color:var(--mu)">Estimate from colour analysis (mould-like and dark patches) and the expiry time. It cannot replace checking smell and texture. Leafy green foods may score lower.</p>'}
+/* ---- map: schematic SVG showing donors, volunteers, NGOs and open food ---- */
+function mapSvg(){var c={donor:"#2E9E5B",volunteer:"#FF8A3D",ngo:"#3B82F6"},s='<svg viewBox="0 0 640 400" role="img" aria-label="Map of donors, volunteers, NGOs and food"><rect width="640" height="400" fill="#dfeadb"/><g stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round"><path d="M0 120H640M0 290H640M200 0V400M450 0V400"/></g>';
+D.dons.filter(live).forEach(function(d){s+='<rect x="'+(d.x-7)+'" y="'+(d.y-7)+'" width="14" height="14" rx="3" fill="'+(d.forw==="Animals"?"#a16207":"#be123c")+'" stroke="#fff" stroke-width="2"><title>Food: '+e(d.name)+'</title></rect>'});
+D.users.filter(function(u){return u.role!=="admin"}).forEach(function(u){s+='<circle cx="'+u.x+'" cy="'+u.y+'" r="13" fill="'+c[u.role]+'" stroke="#fff" stroke-width="3"><title>'+e(u.role+": "+u.name)+'</title></circle>'});
+return'<div class="map">'+s+'</svg></div><p style="color:var(--mu);font-size:.88rem"><span class="tag">Donor</span><span class="tag a">Volunteer</span><span class="tag i">NGO</span><span class="tag u">Food (humans)</span><span class="tag m">Food (animals)</span> Schematic map; live Google Maps cannot load on a published page.</p>'}
+function stat(l,v){return'<div class="card stat"><b>'+v+'</b>'+l+'</div>'}
+function dcard(d,btns){return'<article class="card"><h3>'+e(d.name)+' ('+d.qty+(d.forw==="Animals"?" kg":" servings")+')</h3><div>'+tags(d)+'</div><p>'+e(d.addr)+' &middot; '+left(d)+'</p><p>Donor: '+e(user(d.did).name)+'</p><div class="row">'+(btns||"")+'</div></article>'}
+function notesHTML(u){var n=D.notes.filter(function(x){return x.uid===u.id}).slice(0,4);return n.length?'<h2>Notifications</h2><div class="card">'+n.map(function(x){return'<p>'+e(x.m)+' <small>'+x.t+'</small></p>'}).join("")+'</div>':''}
+function inp(n,l,t,ph){return'<label>'+l+'<input name="'+n+'" type="'+(t||"text")+'" placeholder="'+(ph||"")+'"><span class="err" data-e="'+n+'"></span></label>'}
+/* ---- views ---- */
+var V={
+home:function(){var del=D.dons.filter(function(d){return d.st==="Delivered"}).reduce(function(a,d){return a+d.qty},0);
+return'<section class="hero"><h1>Don\'t waste food. Feed someone today.</h1><p>Restaurants, hotels, events and homes post surplus food. NGOs and animal shelters claim it, volunteers deliver it, and a food scan checks whether it is still safe.</p><div class="row"><a class="btn" href="#/login">Donate food</a><a class="btn o" href="#/login">Join as volunteer</a><a class="btn b" href="#/login">Register NGO</a></div></section><div class="grid">'+stat("Delivered so far",del)+stat("Donors",D.users.filter(function(u){return u.role==="donor"}).length)+stat("NGOs and shelters",D.users.filter(function(u){return u.role==="ngo"}).length)+stat("Volunteers",D.users.filter(function(u){return u.role==="volunteer"}).length)+'</div><h2>How it works</h2><div class="grid"><div class="card"><h3>1. Post and scan</h3><p>Donors list food and scan a photo for a safety percentage and expiry check.</p></div><div class="card"><h3>2. Smart match</h3><p>NGOs see a match score based on distance, urgency and capacity.</p></div><div class="card"><h3>3. Volunteer pickup</h3><p>A nearby volunteer accepts and collects it.</p></div><div class="card"><h3>4. Delivered</h3><p>Everyone is notified when the food arrives.</p></div></div><div class="grid"><div class="card rg"><h3>Donor</h3><p>Post surplus food for people or animals.</p></div><div class="card ro"><h3>Volunteer</h3><p>Pick up and deliver food nearby.</p></div><div class="card rb"><h3>NGO or shelter</h3><p>Claim food for people or animals in your care.</p></div></div><h2>Live map</h2>'+mapSvg()},
+map:function(){return'<section class="p"><h2>Locations</h2>'+mapSvg()+'</section>'},
+'admin-login':function(){return'<section class="p" style="max-width:460px"><h2>Admin login</h2><p style="color:var(--mu)">For FoodBridge administrators. You can view and manage all users, donations and locations.</p><form id="f-adm" novalidate>'+inp("email","Admin email","email")+inp("pw","Password","password")+'<button class="btn r" type="submit">Log in as admin</button></form><h3 style="margin-top:22px">Demo admin</h3><p style="color:var(--mu);font-size:.9rem">admin@demo.com / admin123</p><div class="row"><button class="btn s r" data-act="demo" data-id="admin@demo.com">Demo admin login</button></div><p><a href="#/login">Back to donor, volunteer and NGO login</a></p></section>'},
+login:function(){var rc=["donor","volunteer","ngo"].map(function(r){return'<button type="button" class="rc" data-act="role" data-id="'+r+'" aria-pressed="'+(r===role)+'">'+r[0].toUpperCase()+r.slice(1)+'</button>'}).join("");
+var ex={donor:'<label>Donor type<select name="extra"><option>Restaurant</option><option>Hotel</option><option>Event</option><option>Household</option></select></label>',volunteer:'<label>Vehicle<select name="extra"><option>None</option><option>Bike</option><option>Car</option></select></label>',ngo:inp("extra","People or animals you can serve","number","e.g. 100")}[role];
+var f=mode==="login"?'<form id="f-in" novalidate>'+inp("email","Email","email")+inp("pw","Password","password")+'<button class="btn" type="submit">Log in</button></form>':'<form id="f-up" novalidate><div class="roles">'+rc+'</div>'+inp("name",role==="ngo"?"Organisation name":"Name")+inp("email","Email","email")+inp("phone","Phone","tel")+inp("addr","Address or area")+ex+inp("pw","Password (6+ characters)","password")+'<div class="bar"><i id="pwm" style="width:0"></i></div><button class="btn" type="submit">Create account</button></form>';
+return'<section class="p" style="max-width:560px"><h2>'+(mode==="login"?"Log in":"Sign up")+'</h2><div class="row" style="margin:0 0 14px"><button class="btn s '+(mode==="login"?"":"ghost")+'" data-act="mode" data-id="login">Log in</button><button class="btn s '+(mode==="up"?"":"ghost")+'" data-act="mode" data-id="up">Sign up</button></div>'+f+'<h3 style="margin-top:22px">Demo login</h3><div class="row"><button class="btn s" data-act="demo" data-id="donor@demo.com">Donor</button><button class="btn s o" data-act="demo" data-id="vol@demo.com">Volunteer</button><button class="btn s b" data-act="demo" data-id="ngo@demo.com">NGO</button><button class="btn s ghost" data-act="demo" data-id="paws@demo.com">Animal shelter</button></div><p style="font-size:.9rem"><a href="#/admin-login">Administrator? Log in here</a></p></section>'},
+donor:function(u){var mine=D.dons.filter(function(d){return d.did===u.id}),dl=mine.filter(function(d){return d.st==="Delivered"}).reduce(function(a,d){return a+d.qty},0);
+var dt=new Date(Date.now()+4*36e5);dt=new Date(dt-dt.getTimezoneOffset()*6e4).toISOString().slice(0,16);
+return'<section class="p"><h2>Donor dashboard</h2><div class="grid">'+stat("Donations",mine.length)+stat("Delivered",dl)+stat("Active",mine.filter(live).length)+stat("CO2 saved (kg, est.)",Math.round(dl*2.5))+'</div>'+notesHTML(u)+'<h2>Donate food</h2><form id="f-don" novalidate>'+inp("name","Food name")+'<div class="two"><label>For<select name="forw"><option>Humans</option><option>Animals</option></select></label><label>Type<select name="diet"><option>Veg</option><option>Non-veg</option></select></label></div><div class="two">'+inp("qty","Quantity (servings or kg)","number")+'<label>Best before<input name="exp" type="datetime-local" value="'+dt+'"></label></div>'+inp("addr","Pickup address")+'<div class="row" style="margin:0"><button type="button" class="btn s ghost" data-act="loc">Use my location</button><span id="locmsg" style="color:var(--mu);font-size:.88rem"></span></div><div class="scan"><b>Food safety scan</b><p style="margin:4px 0;color:var(--mu);font-size:.9rem">Add a photo to get a safety percentage and expiry check.</p><input type="file" id="img" accept="image/*" aria-label="Food photo"><div class="row" style="margin-top:8px"><button type="button" class="btn s o" data-act="scan">Scan food</button></div><div id="scanout">'+scanHTML()+'</div></div><button class="btn" type="submit">Post donation</button></form><h2 style="margin-top:28px">My donations</h2>'+(mine.length?'<div class="grid">'+mine.map(function(d){return dcard(d,d.st==="Available"?'<button class="btn s r" data-act="cancel" data-id="'+d.id+'">Cancel</button>':'')}).join("")+'</div>':'<div class="empty">No donations yet. Post your first one above.</div>')+'</section>'},
+volunteer:function(u){var av=D.dons.filter(function(d){return d.st==="Accepted"&&!d.vid&&live(d)}),my=D.dons.filter(function(d){return d.vid===u.id}),dn=my.filter(function(d){return d.st==="Delivered"}).length;
+return'<section class="p"><h2>Volunteer dashboard</h2><div class="grid">'+stat("Pickups completed",dn)+stat("Active tasks",my.length-dn)+stat("Badge",dn>=10?"Gold":dn>=5?"Silver":"Bronze")+'</div>'+notesHTML(u)+'<h2>Available pickups</h2>'+(av.length?'<div class="grid">'+av.map(function(d){return dcard(d,'<button class="btn s o" data-act="vacc" data-id="'+d.id+'">Accept pickup</button>')+'<p>Deliver to: '+e(user(d.nid).name)+'</p>'}).join("")+'</div>':'<div class="empty">No pickups right now. NGOs must claim a donation first.</div>')+'<h2>My tasks</h2>'+(my.length?'<div class="grid">'+my.map(function(d){return dcard(d,d.st==="Accepted"?'<button class="btn s o" data-act="pick" data-id="'+d.id+'">Mark picked up</button>':d.st==="Picked Up"?'<button class="btn s" data-act="deliv" data-id="'+d.id+'">Mark delivered</button>':'')}).join("")+'</div>':'<div class="empty">Accept a pickup to see it here.</div>')+'<h2>Map</h2>'+mapSvg()+'</section>'},
+ngo:function(u){var all=D.dons.filter(function(d){return d.st==="Available"&&hrs(d)>0&&(flt==="All"||d.forw===flt)}).sort(function(a,b){return match(u,b)-match(u,a)}),rec=D.dons.filter(function(d){return d.nid===u.id});
+return'<section class="p"><h2>NGO dashboard</h2><div class="grid">'+stat("Received",rec.filter(function(d){return d.st==="Delivered"}).reduce(function(a,d){return a+d.qty},0))+stat("Claimed, in progress",rec.filter(function(d){return d.st!=="Delivered"}).length)+stat("Capacity",u.extra)+'</div>'+notesHTML(u)+'<h2>Browse donations</h2><div class="row" style="margin:0 0 10px">'+["All","Humans","Animals"].map(function(f){return'<button class="btn s '+(f===flt?"":"ghost")+'" data-act="flt" data-id="'+f+'">'+f+'</button>'}).join("")+'</div>'+(all.length?'<div class="grid">'+all.map(function(d,i){return dcard(d,'<span class="tag">Match '+match(u,d)+'%</span>'+(i===0?'<span class="tag a">Best match</span>':'')+'<button class="btn s b" data-act="claim" data-id="'+d.id+'">Claim</button>')}).join("")+'</div>':'<div class="empty">Nothing available for this filter. Expired listings are hidden.</div>')+'<h2>Incoming deliveries</h2>'+(rec.length?'<div class="grid">'+rec.map(function(d){return dcard(d,'<span class="tag">Volunteer: '+e(d.vid?user(d.vid).name:"waiting")+'</span>')}).join("")+'</div>':'<div class="empty">Claim a donation to track its delivery.</div>')+'</section>'},
+admin:function(){var us=D.users.filter(function(u){return u.role!=="admin"});
+return'<section class="p"><h2>Admin dashboard</h2><div class="grid">'+stat("Users",us.length)+stat("Donations",D.dons.length)+stat("Active",D.dons.filter(live).length)+stat("Delivered",D.dons.filter(function(d){return d.st==="Delivered"}).length)+'</div><h2>Map of all users</h2>'+mapSvg()+'<h2>All users</h2><div class="card tbl"><table><tr><th>Role</th><th>Name</th><th>Email</th><th>Phone</th><th>Details</th><th></th></tr>'+us.map(function(u){return'<tr><td>'+u.role+'</td><td>'+e(u.name)+'</td><td>'+e(u.email)+'</td><td>'+e(u.phone)+'</td><td>'+e(u.extra)+'</td><td><button class="btn s r" data-act="deluser" data-id="'+u.id+'">Remove</button></td></tr>'}).join("")+'</table></div><h2>All donations</h2><div class="card tbl"><table><tr><th>Food</th><th>Donor</th><th>For</th><th>Qty</th><th>Status</th><th>NGO</th><th>Volunteer</th><th>Safety</th><th>Expiry</th><th></th></tr>'+D.dons.map(function(d){return'<tr><td>'+e(d.name)+'</td><td>'+e(user(d.did).name)+'</td><td>'+d.forw+'</td><td>'+d.qty+'</td><td>'+d.st+'</td><td>'+(d.nid?e(user(d.nid).name):"-")+'</td><td>'+(d.vid?e(user(d.vid).name):"-")+'</td><td>'+(d.safe!=null?d.safe+"%":"-")+'</td><td>'+left(d)+'</td><td><button class="btn s r" data-act="deldon" data-id="'+d.id+'">Delete</button></td></tr>'}).join("")+'</table></div><div class="row"><button class="btn ghost" data-act="reset">Reset demo data</button></div></section>'}};
+/* ---- router ---- */
+function render(){var r=location.hash.replace("#/","")||"home",u=me();
+if(!V[r])r="home";if(r==="admin-login"&&u&&u.role==="admin"){location.hash="#/admin";return}if(r==="admin"&&!u){location.hash="#/admin-login";toast("Admin login required");return}if(["donor","volunteer","ngo","admin"].indexOf(r)>-1){if(!u){location.hash="#/login";toast("Please log in first");return}if(u.role!==r){location.hash="#/"+u.role;return}}
+var nv='<a class="logo" href="#/home">FoodBridge</a><button class="l" id="burger" data-act="burger" aria-label="Menu">Menu</button><span class="m" style="display:contents"><a class="l '+(r==="home"?"on":"")+'" href="#/home">Home</a><a class="l '+(r==="map"?"on":"")+'" href="#/map">Map</a>'+(u?'<a class="l '+(r===u.role?"on":"")+'" href="#/'+u.role+'">Dashboard</a><button class="l" data-act="out">Log out ('+e(u.name.split(" ")[0])+')</button>':'<a class="l '+(r==="login"?"on":"")+'" href="#/login">Log in / Sign up</a><a class="l '+(r==="admin-login"?"on":"")+'" href="#/admin-login">Admin</a>')+'<button class="l" data-act="theme">Dark mode</button></span>';
+document.getElementById("nav").innerHTML=nv;document.getElementById("app").innerHTML=V[r](u)}
+function rerender(){var y=scrollY;render();scrollTo(0,y)}
+function setErr(f,errs){f.querySelectorAll("[data-e]").forEach(function(s){s.textContent=errs[s.dataset.e]||""});return Object.keys(errs).length===0}
+document.addEventListener("submit",function(ev){ev.preventDefault();var f=ev.target,d=new FormData(f),id=f.id,errs={};
+if(id==="f-adm"){var a=D.users.filter(function(x){return x.role==="admin"&&x.email===d.get("email").trim().toLowerCase()&&x.pw===d.get("pw")})[0];if(!a){setErr(f,{pw:"Admin email or password is incorrect"});return}login(a);return}
+if(id==="f-in"){var u=D.users.filter(function(x){return x.email===d.get("email").trim().toLowerCase()&&x.pw===d.get("pw")})[0];if(!u){setErr(f,{pw:"Email or password is incorrect"});return}if(u.role==="admin"){setErr(f,{pw:"Administrators log in on the Admin page"});return}login(u)}
+if(id==="f-up"){var em=d.get("email").trim().toLowerCase();if(!d.get("name").trim())errs.name="Enter a name";if(!/^\S+@\S+\.\S+$/.test(em))errs.email="Enter a valid email";else if(D.users.some(function(x){return x.email===em}))errs.email="This email is already registered";if(!/^\d{7,}$/.test(d.get("phone").replace(/\D/g,"")))errs.phone="Enter a valid phone number";if(!d.get("addr").trim())errs.addr="Enter your address";if(d.get("pw").length<6)errs.pw="Use at least 6 characters";if(role==="ngo"&&!(+d.get("extra")>0))errs.extra="Enter a number";
+if(!setErr(f,errs))return;var nu={id:D.nid++,role:role,name:d.get("name").trim(),email:em,phone:d.get("phone"),pw:d.get("pw"),x:60+Math.round(Math.random()*520),y:50+Math.round(Math.random()*300),extra:d.get("extra")};D.users.push(nu);sv();login(nu)}
+if(id==="f-don"){var u2=me(),q=+d.get("qty"),ex=new Date(d.get("exp"));if(!d.get("name").trim())errs.name="Enter the food name";if(!(q>0))errs.qty="Enter a quantity";if(!d.get("addr").trim())errs.addr="Enter the pickup address";if(isNaN(ex))errs.exp="Pick a date";else if(ex<=Date.now())errs.exp="This food is already expired and cannot be listed";if(scan&&scan.v.s<50)errs.name="Scan says this food is not safe, so it cannot be listed";
+if(!setErr(f,errs))return;D.dons.unshift({id:D.nid++,did:u2.id,name:d.get("name").trim(),diet:d.get("diet"),forw:d.get("forw"),qty:q,exp:ex.toISOString(),addr:d.get("addr").trim(),x:u2.x+Math.round(Math.random()*30-15),y:u2.y+Math.round(Math.random()*30-15),st:"Available",safe:scan?scan.v.s:null});D.users.filter(function(x){return x.role==="ngo"}).forEach(function(n){note(n.id,"New donation available: "+d.get("name").trim())});sv();scan=null;toast("Donation posted");rerender()}});
+function login(u){try{localStorage.setItem(SK,u.id)}catch(x){}toast("Welcome, "+u.name);location.hash="#/"+u.role;render()}
+function dn(id){return D.dons.filter(function(d){return d.id==id})[0]}
+document.addEventListener("click",function(ev){var t=ev.target.closest("[data-act]");if(!t)return;var a=t.dataset.act,id=t.dataset.id,u=me(),d;
+if(a==="role"){role=id;rerender()}else if(a==="mode"){mode=id;rerender()}else if(a==="theme"){var h=document.documentElement;h.setAttribute("data-theme",h.getAttribute("data-theme")==="dark"?"light":"dark")}
+else if(a==="burger")document.getElementById("nav").classList.toggle("open")
+else if(a==="demo")login(D.users.filter(function(x){return x.email===id})[0])
+else if(a==="out"){try{localStorage.removeItem(SK)}catch(x){}toast("Logged out");location.hash="#/home";render()}
+else if(a==="flt"){flt=id;rerender()}
+else if(a==="loc"){var m=document.getElementById("locmsg");if(!navigator.geolocation){m.textContent="Location is not available in this browser";return}m.textContent="Finding you...";navigator.geolocation.getCurrentPosition(function(p){u.x=40+Math.round(((p.coords.longitude%.1+.1)%.1)/.1*560);u.y=40+Math.round(((p.coords.latitude%.1+.1)%.1)/.1*320);sv();m.textContent="Location saved ("+p.coords.latitude.toFixed(4)+", "+p.coords.longitude.toFixed(4)+"), shown approximately on the map"},function(){m.textContent="Could not get your location. Allow location access and try again."})}
+else if(a==="scan"){var fl=document.getElementById("img").files[0],ex=document.querySelector("#f-don [name=exp]").value;if(!fl){toast("Choose a food photo first");return}if(!ex){toast("Set the best-before time first");return}analyze(fl,function(r){scan={src:r.src,v:verdict(r,new Date(ex).toISOString())};document.getElementById("scanout").innerHTML=scanHTML()})}
+else if(a==="cancel"){D.dons=D.dons.filter(function(x){return x.id!=id});sv();toast("Donation cancelled");rerender()}
+else if(a==="claim"){d=dn(id);d.st="Accepted";d.nid=u.id;note(d.did,u.name+" claimed "+d.name);D.users.filter(function(x){return x.role==="volunteer"}).forEach(function(v){note(v.id,"New pickup: "+d.name)});sv();toast("Claimed. A volunteer will be notified");rerender()}
+else if(a==="vacc"){d=dn(id);d.vid=u.id;note(d.did,u.name+" will pick up "+d.name);note(d.nid,u.name+" is collecting "+d.name);sv();toast("Pickup accepted");rerender()}
+else if(a==="pick"){d=dn(id);d.st="Picked Up";note(d.did,d.name+" was picked up");sv();rerender()}
+else if(a==="deliv"){d=dn(id);d.st="Delivered";note(d.did,d.name+" was delivered");note(d.nid,d.name+" was delivered to you");sv();toast("Delivered. Thank you");rerender()}
+else if(a==="deluser"){if(confirm("Remove this user?")){D.users=D.users.filter(function(x){return x.id!=id});sv();rerender()}}
+else if(a==="deldon"){if(confirm("Delete this donation?")){D.dons=D.dons.filter(function(x){return x.id!=id});sv();rerender()}}
+else if(a==="reset"){if(confirm("Reset all demo data?")){D=seed();sv();toast("Demo data reset");rerender()}}});
+document.addEventListener("input",function(ev){if(ev.target.name==="pw"&&ev.target.form.id==="f-up"){var p=ev.target.value,s=(p.length>=6)+(/[A-Z]/.test(p))+(/\d/.test(p))+(/[^\w]/.test(p)),b=document.getElementById("pwm");b.style.width=s*25+"%";b.style.background=s<2?"var(--r)":s<3?"var(--o)":"var(--g)"}});
+window.addEventListener("hashchange",function(){render();scrollTo(0,0)});render();
+</script></body></html>
